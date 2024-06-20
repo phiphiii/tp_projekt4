@@ -126,7 +126,7 @@ int main(int argc, char* args[])
                     SDL_GetRendererOutputSize(gRenderer.get(), &screenWidth, &screenHeight);
 
                     x = static_cast<int>(x - screenWidth / 2);
-                    y = static_cast<int>(y - screenHeight / 2);  // Invert y-axis for screen coordinates
+                    y = static_cast<int>(-y + screenHeight / 2);  // Invert y-axis for screen coordinates
                     std::cout << "Q position: (" << x << ", " << y << ")" << std::endl;
                     goal_state << x, y, 0, 0, 0, 0;
                     quadrotor.SetGoal(goal_state);
