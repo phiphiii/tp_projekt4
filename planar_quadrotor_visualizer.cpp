@@ -35,22 +35,23 @@ void PlanarQuadrotorVisualizer::render(std::shared_ptr<SDL_Renderer>& gRenderer)
     };
 
     struct Rotor {
-        Point offset;
         Point position;
-        Point large_left, small_left, large_right, small_right;
-        int width;
+        float width;
     };
 
     struct Quadrotor {
-        Point left_top, right_bottom;
-        Rotor rotor;
+        Point body_start, body_end;
+        Rotor left_rotor1, left_rotor2, right_rotor1, right_rotor2;
         float length, height;
     };
 
     Quadrotor quadrotor;
     quadrotor.length = 100.0f; // Quadrotor body length
     quadrotor.height = 10.0f;  // Quadrotor body height
-    quadrotor.rotor.width = 5; // Rotor width
+    quadrotor.left_rotor1.width = 5.0f; // Rotor width
+    quadrotor.left_rotor2.width = 5.0f; // Rotor width
+    quadrotor.right_rotor1.width = 5.0f; // Rotor width
+    quadrotor.right_rotor2.width = 5.0f; // Rotor width
 
     static int last_tick = 0;
     static int multiplier = 1;
@@ -60,42 +61,45 @@ void PlanarQuadrotorVisualizer::render(std::shared_ptr<SDL_Renderer>& gRenderer)
         multiplier = multiplier == -1 ? 1 : -1;
     }
 
-    // Calculate rotor and body positions
-    quadrotor.left_top = { screenX - std::cos(q_theta) * (quadrotor.length / 2), screenY + std::sin(q_theta) * (quadrotor.length / 2) };
-    quadrotor.right_bottom = { screenX + (quadrotor.length / 2) * std::cos(q_theta), screenY - std::sin(q_theta) * (quadrotor.length / 2) };
+    // Calculate body positions
+    quadrotor.body_start = { screenX - (quadrotor.length / 2) * std::cos(q_theta), screenY + (quadrotor.length / 2) * std::sin(q_theta) };
+    quadrotor.body_end = { screenX + (quadrotor.length / 2) * std::cos(q_theta), screenY - (quadrotor.length / 2) * std::sin(q_theta) };
 
     // Rotor positions relative to the body
-    quadrotor.rotor.offset = { quadrotor.length * std::cos(q_theta), quadrotor.length * std::sin(q_theta) };
-    quadrotor.rotor.position = { quadrotor.height * std::sin(q_theta), quadrotor.height * std::cos(q_theta) };
+    quadrotor.left_rotor1.position = { quadrotor.body_start.x - 15.0f * multiplier, quadrotor.body_start.y - 15.0f };
+    quadrotor.left_rotor2.position = { quadrotor.body_start.x - 15.0f * multiplier, quadrotor.body_start.y + 15.0f };
+    quadrotor.right_rotor1.position = { quadrotor.body_end.x + 15.0f * multiplier, quadrotor.body_end.y - 15.0f };
+    quadrotor.right_rotor2.position = { quadrotor.body_end.x + 15.0f * multiplier, quadrotor.body_end.y + 15.0f };
 
-    quadrotor.rotor.large_left = { quadrotor.left_top.x + (15.0f * multiplier), quadrotor.left_top.y };
-    quadrotor.rotor.small_left = { quadrotor.left_top.x - (10.0f * multiplier), quadrotor.left_top.y };
-    quadrotor.rotor.large_right = { quadrotor.right_bottom.x - (15.0f * multiplier), quadrotor.right_bottom.y };
-    quadrotor.rotor.small_right = { quadrotor.right_bottom.x + (10.0f * multiplier), quadrotor.right_bottom.y };
-
-    int quadrotor_color = 0xFF133D86;
-    int rotor_mount_color = 0xFF85C335;
-    int rotor_color1 = 0xFFFFB340;
-    int rotor_color2 = 0xFFD89735;
+    // Updated colors
+    int quadrotor_color = 0xFF00FF00;       // Green color for the quadrotor body
+    int rotor_mount_color = 0xFF0000FF;     // Blue color for the rotor mountings
+    int rotor_color1 = 0xFFFF0000;          // Red color for the large rotors
+    int rotor_color2 = 0xFFFFFF00;          // Yellow color for the small rotors
 
     // Draw the quadrotor body
-    //thickLineColor(gRenderer.get(), quadrotor.left_top.x, quadrotor.left_top.y, quadrotor.right_bottom.x, quadrotor.right_bottom.y, quadrotor.height, quadrotor_color);
+    thickLineColor(gRenderer.get(), quadrotor.body_start.x, quadrotor.body_start.y, quadrotor.body_end.x, quadrotor.body_end.y, quadrotor.height, quadrotor_color);
 
-    // Draw rotor mountings
-    thickLineColor(gRenderer.get(), quadrotor.left_top.x, quadrotor.left_top.y, quadrotor.left_top.x - quadrotor.rotor.offset.x, quadrotor.left_top.y - quadrotor.rotor.offset.y, quadrotor.rotor.width, rotor_mount_color);
-    thickLineColor(gRenderer.get(), quadrotor.right_bottom.x, quadrotor.right_bottom.y, quadrotor.right_bottom.x - quadrotor.rotor.offset.x, quadrotor.right_bottom.y - quadrotor.rotor.offset.y, quadrotor.rotor.width, rotor_mount_color);
+    // Draw rotor mountings for the first left rotor
+    thickLineColor(gRenderer.get(), quadrotor.body_start.x, quadrotor.body_start.y, quadrotor.left_rotor1.position.x, quadrotor.left_rotor1.position.y, quadrotor.left_rotor1.width, rotor_mount_color);
+    // Draw rotor mountings for the second left rotor
+    thickLineColor(gRenderer.get(), quadrotor.body_start.x, quadrotor.body_start.y, quadrotor.left_rotor2.position.x, quadrotor.left_rotor2.position.y, quadrotor.left_rotor2.width, rotor_mount_color);
+    // Draw rotor mountings for the first right rotor
+    thickLineColor(gRenderer.get(), quadrotor.body_end.x, quadrotor.body_end.y, quadrotor.right_rotor1.position.x, quadrotor.right_rotor1.position.y, quadrotor.right_rotor1.width, rotor_mount_color);
+    // Draw rotor mountings for the second right rotor
+    thickLineColor(gRenderer.get(), quadrotor.body_end.x, quadrotor.body_end.y, quadrotor.right_rotor2.position.x, quadrotor.right_rotor2.position.y, quadrotor.right_rotor2.width, rotor_mount_color);
 
-    // Draw rotors
-    filledEllipseColor(gRenderer.get(), quadrotor.rotor.large_left.x, quadrotor.rotor.large_left.y, 15, 5, rotor_color1);
-    filledEllipseColor(gRenderer.get(), quadrotor.rotor.small_left.x, quadrotor.rotor.small_left.y, 10, 3, rotor_color2);
-    filledEllipseColor(gRenderer.get(), quadrotor.rotor.large_right.x, quadrotor.rotor.large_right.y, 15, 5, rotor_color1);
-    filledEllipseColor(gRenderer.get(), quadrotor.rotor.small_right.x, quadrotor.rotor.small_right.y, 10, 3, rotor_color2);
+    // Draw first pair of left rotors
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor1.position.x, quadrotor.left_rotor1.position.y, 15, 5, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor1.position.x, quadrotor.left_rotor1.position.y, 10, 3, rotor_color2);
+    // Draw second pair of left rotors with different sizes
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor2.position.x, quadrotor.left_rotor2.position.y, 20, 7, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor2.position.x, quadrotor.left_rotor2.position.y, 12, 4, rotor_color2);
 
-    // Calculate and draw the quadrotor body on the other end of rotor mountings
-    float body_offset_x = quadrotor.length * std::cos(q_theta);
-    float body_offset_y = quadrotor.length * std::sin(q_theta);
-    Point body_left_top = { quadrotor.left_top.x - body_offset_x, quadrotor.left_top.y - body_offset_y };
-    Point body_right_bottom = { quadrotor.right_bottom.x - body_offset_x, quadrotor.right_bottom.y - body_offset_y };
-
-    thickLineColor(gRenderer.get(), body_left_top.x, body_left_top.y, body_right_bottom.x, body_right_bottom.y, quadrotor.height, quadrotor_color);
+    // Draw first pair of right rotors
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor1.position.x, quadrotor.right_rotor1.position.y, 15, 5, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor1.position.x, quadrotor.right_rotor1.position.y, 10, 3, rotor_color2);
+    // Draw second pair of right rotors with different sizes
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor2.position.x, quadrotor.right_rotor2.position.y, 20, 7, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor2.position.x, quadrotor.right_rotor2.position.y, 12, 4, rotor_color2);
 }
