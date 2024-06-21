@@ -66,19 +66,23 @@ void PlanarQuadrotorVisualizer::render(std::shared_ptr<SDL_Renderer>& gRenderer)
     quadrotor.body_end = { screenX + (quadrotor.length / 2) * std::cos(q_theta), screenY - (quadrotor.length / 2) * std::sin(q_theta) };
 
     // Rotor positions relative to the body
-    quadrotor.left_rotor1.position = { quadrotor.body_start.x - 15.0f * multiplier, quadrotor.body_start.y - 15.0f };
-    quadrotor.left_rotor2.position = { quadrotor.body_start.x - 15.0f * multiplier, quadrotor.body_start.y + 15.0f };
-    quadrotor.right_rotor1.position = { quadrotor.body_end.x + 15.0f * multiplier, quadrotor.body_end.y - 15.0f };
-    quadrotor.right_rotor2.position = { quadrotor.body_end.x + 15.0f * multiplier, quadrotor.body_end.y + 15.0f };
+    quadrotor.left_rotor1.position = { quadrotor.body_start.x - 15.0f, quadrotor.body_start.y - 15.0f };
+    quadrotor.left_rotor2.position = { quadrotor.body_start.x - 15.0f, quadrotor.body_start.y + 15.0f };
+    quadrotor.right_rotor1.position = { quadrotor.body_end.x + 15.0f, quadrotor.body_end.y - 15.0f };
+    quadrotor.right_rotor2.position = { quadrotor.body_end.x + 15.0f, quadrotor.body_end.y + 15.0f };
 
     // Updated colors
-    int quadrotor_color = 0xFF00FF00;       // Green color for the quadrotor body
-    int rotor_mount_color = 0xFF0000FF;     // Blue color for the rotor mountings
-    int rotor_color1 = 0xFFFF0000;          // Red color for the large rotors
-    int rotor_color2 = 0xFFFFFF00;          // Yellow color for the small rotors
+    int quadrotor_color = 0xFF18191A;       // Green color for the quadrotor body 0xFF18191A
+    int rotor_mount_color = 0xFFAAAAAA;     // raczki
+    int rotor_color1 = 0xFF505050;          // grey color for the rotors
+    int camera_color = 0xFFe06666;
+   
 
     // Draw the quadrotor body
     thickLineColor(gRenderer.get(), quadrotor.body_start.x, quadrotor.body_start.y, quadrotor.body_end.x, quadrotor.body_end.y, quadrotor.height, quadrotor_color);
+
+    filledEllipseColor(gRenderer.get(), (quadrotor.body_start.x +quadrotor.body_end.x)/2, ((quadrotor.body_start.y + quadrotor.body_end.y) / 2)+10, 10, 7, rotor_color1);
+    filledEllipseColor(gRenderer.get(), (quadrotor.body_start.x + quadrotor.body_end.x) / 2, ((quadrotor.body_start.y + quadrotor.body_end.y) / 2) + 10, 5, 3, camera_color);
 
     // Draw rotor mountings for the first left rotor
     thickLineColor(gRenderer.get(), quadrotor.body_start.x, quadrotor.body_start.y, quadrotor.left_rotor1.position.x, quadrotor.left_rotor1.position.y, quadrotor.left_rotor1.width, rotor_mount_color);
@@ -89,17 +93,17 @@ void PlanarQuadrotorVisualizer::render(std::shared_ptr<SDL_Renderer>& gRenderer)
     // Draw rotor mountings for the second right rotor
     thickLineColor(gRenderer.get(), quadrotor.body_end.x, quadrotor.body_end.y, quadrotor.right_rotor2.position.x, quadrotor.right_rotor2.position.y, quadrotor.right_rotor2.width, rotor_mount_color);
 
-    // Draw first pair of left rotors
-    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor1.position.x, quadrotor.left_rotor1.position.y, 15, 5, rotor_color1);
-    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor1.position.x, quadrotor.left_rotor1.position.y, 10, 3, rotor_color2);
-    // Draw second pair of left rotors with different sizes
-    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor2.position.x, quadrotor.left_rotor2.position.y, 20, 7, rotor_color1);
-    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor2.position.x, quadrotor.left_rotor2.position.y, 12, 4, rotor_color2);
+    
 
-    // Draw first pair of right rotors
-    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor1.position.x, quadrotor.right_rotor1.position.y, 15, 5, rotor_color1);
-    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor1.position.x, quadrotor.right_rotor1.position.y, 10, 3, rotor_color2);
-    // Draw second pair of right rotors with different sizes
-    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor2.position.x, quadrotor.right_rotor2.position.y, 20, 7, rotor_color1);
-    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor2.position.x, quadrotor.right_rotor2.position.y, 12, 4, rotor_color2);
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor1.position.x + 15.0f * (multiplier), quadrotor.right_rotor1.position.y, 15, 5, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor1.position.x + 15.0f * (-multiplier), quadrotor.right_rotor1.position.y, 20 , 7, rotor_color1);
+
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor2.position.x + 15.0f * (-multiplier), quadrotor.right_rotor2.position.y, 13, 3, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.right_rotor2.position.x + 15.0f * (multiplier), quadrotor.right_rotor2.position.y, 15, 5, rotor_color1);
+
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor1.position.x + 15.0f * (multiplier), quadrotor.left_rotor1.position.y, 15, 5, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor1.position.x + 15.0f * (-multiplier), quadrotor.left_rotor1.position.y, 20, 7, rotor_color1);
+
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor2.position.x + 15.0f * (-multiplier), quadrotor.left_rotor2.position.y, 13, 3, rotor_color1);
+    filledEllipseColor(gRenderer.get(), quadrotor.left_rotor2.position.x + 15.0f * (multiplier), quadrotor.left_rotor2.position.y, 15, 5, rotor_color1);
 }
